@@ -235,6 +235,12 @@ const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
             }
         }, 100);
     };
+    const newRecord = () =>{
+        const currentRecord = localStorage.getItem("high-score")
+        if(!currentRecord || currentRecord<score){
+            localStorage.setItem("high-score",score);
+        }
+    }
 
     //ends game by ending all intervals
     const gameOver = () => {
@@ -245,6 +251,7 @@ const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
         gameRunning = false;
         updateGameState();
         startWaveEffect();
+        newRecord();
     };
 
     return (

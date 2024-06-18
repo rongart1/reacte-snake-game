@@ -16,6 +16,12 @@ function GameMessage({gameState,setGameState,score}){
                             "inline-block" :
                              "none" }}
             >Score: {score}</h1>
+            
+            <p className="game-over-text"
+             style={{ display: gameState === "gameOver" ? 
+                            "inline-block" :
+                             "none" }}
+            >Highest score: {localStorage.getItem("high-score")? localStorage.getItem("high-score"): score}</p>
 
             <button className="start-btn"
                 onClick={() =>setGameState("running")}
