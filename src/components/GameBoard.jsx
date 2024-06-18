@@ -1,40 +1,43 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useImperativeHandle } from 'react';
 
-const GameBoard = forwardRef(({ scoreDisplay, gameState, setGameState }, ref) => {
+const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
     let playerPositions = [new Position(2, 2)]; // Starting with one block at position (2,2)
-    let playerDirection = "right"; // Starting direction is right
-    let lastDirection = "right"; // Saves the last direction of the player
+    let playerDirection = ""; // Starting direction is right
+    let lastDirection = ""; // Saves the last direction of the player
     let gameRunning = false;
     let score;
     let foodPosition = null;
 
-    const changeDirection = (key) => {
-        if (gameRunning) {
-            switch (key.code) {
-                case "KeyD":
-                    if (lastDirection !== "left") playerDirection = "right";
-                    break;
-                case "KeyA":
-                    if (lastDirection !== "right") playerDirection = "left";
-                    break;
-                case "KeyW":
-                    if (lastDirection !== "down") playerDirection = "up";
-                    break;
-                case "KeyS":
-                    if (lastDirection !== "up") playerDirection = "down";
-                    break;
-                default:
-                    break;
-            }
+    const changeDirection = (keyCode) => {
+        console.log(`change dir called with: ${keyCode}`);
+        switch (keyCode) {
+            case "KeyD":
+                if (lastDirection != "left") playerDirection = "right";
+                break;
+            case "KeyA":
+                if (lastDirection != "right") playerDirection = "left";
+                break;
+            case "KeyW":
+                if (lastDirection != "down") playerDirection = "up";
+                break;
+            case "KeyS":
+                if (lastDirection != "up") playerDirection = "down";
+                break;
+            default:
+                console.log("didn't catch movement key");
+                break;
         }
+        console.log(playerDirection);
     };
 
-    useEffect(() => {
-        document.addEventListener("keydown", changeDirection);
-        return () => {
-            document.removeEventListener("keydown", changeDirection);
-        };
-    }, []);
+    // Adding event listener for change direction
+    const handleKeyDown = (key) => {
+        console.log(`Key pressed: ${key.code}`);
+        changeDirection(key.code);
+    };
+
+    console.log("Adding event listener");
+    document.addEventListener("keydown", handleKeyDown);
 
     const boardWidth = 15;
     const boardHeight = 15;
@@ -93,13 +96,13 @@ const GameBoard = forwardRef(({ scoreDisplay, gameState, setGameState }, ref) =>
         const tail = playerPositions[playerPositions.length - 1];
         lastPosition = new Position(tail.row, tail.col); // Save the tail position
 
-        //moving the body
+        // Moving the body
         for (let i = playerPositions.length - 1; i >= 1; i--) {
             playerPositions[i].col = playerPositions[i - 1].col;
             playerPositions[i].row = playerPositions[i - 1].row;
         }
 
-        switch (playerDirection) { //moving the head
+        switch (playerDirection) { // Moving the head
             case "right":
                 if (playerHead.col < 15) {
                     playerHead.col++;
@@ -133,10 +136,11 @@ const GameBoard = forwardRef(({ scoreDisplay, gameState, setGameState }, ref) =>
                 }
                 break;
             default:
+                console.log("didn't move");
                 break;
         }
 
-        checkEat(); // after each move checking if you are on food and action based on it
+        checkEat(); // After each move checking if you are on food and action based on it
         checkOverlap();
     };
 
@@ -152,21 +156,28 @@ const GameBoard = forwardRef(({ scoreDisplay, gameState, setGameState }, ref) =>
         });
     };
 
-    //checking overlap and ending game if true
+    // Checking overlap and ending game if true
     const checkOverlap = () => {
         if (playerPositions.slice(1).some(pos => pos.equals(playerPositions[0]))) {
             gameOver();
         }
-    }
+    };
 
+    // Method for updating the gameState
     const updateGameState = () => {
         if (gameRunning)
             setGameState("running");
         else
             setGameState("gameOver");
-    }
+    };
 
-    //checks if the player ate and increase player size
+    useEffect(() => {
+        if (gameState == "running" && !gameRunning) {
+            reStartGame();
+        }
+    }, [gameState]);
+
+    // Checks if the player ate and increase player size
     const checkEat = () => {
         if (foodPosition && playerPositions[0].equals(foodPosition)) {
             foodPosition = null;
@@ -177,15 +188,15 @@ const GameBoard = forwardRef(({ scoreDisplay, gameState, setGameState }, ref) =>
         }
     };
 
-    //print the positions for debugging
+    // Print the positions for debugging
     const printPositions = () => {
         let positons = [];
         playerPositions.forEach(pos => {
             positons.push(pos);
-        })
+        });
         console.log(`food: ${foodPosition}`);
         console.log(`player: ${positons}`);
-    }
+    };
 
     let intervals = [];
     const reStartGame = () => {
@@ -203,10 +214,6 @@ const GameBoard = forwardRef(({ scoreDisplay, gameState, setGameState }, ref) =>
         intervals.push(setInterval(updateGameState, gameTick));
     };
 
-    useImperativeHandle(ref, () => ({
-        reStartGame
-    }));
-
     const gameOver = () => {
         intervals.forEach(interval => {
             clearInterval(interval);
@@ -221,7 +228,7 @@ const GameBoard = forwardRef(({ scoreDisplay, gameState, setGameState }, ref) =>
             {mappedBlocks}
         </div>
     );
-});
+};
 
 class Position {
     constructor(row, col) {

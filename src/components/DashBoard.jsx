@@ -1,11 +1,9 @@
 import { useState } from "react"
 
-function DashBoard({score,gameState,handleRestart}){
+function DashBoard({score,gameState,setGameState}){
 
     const startGame = () =>{
-        if(gameState!="running"){
-            handleRestart();
-        }
+       setGameState("running");
     }
 
     return(<div className="dash-board">
