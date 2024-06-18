@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 
-function GameBoard({scoreDisplay}) {
+const GameBoard = forwardRef(({ scoreDisplay, gameState, setGameState }, ref) => {
     let playerPositions = [new Position(2, 2)]; // Starting with one block at position (2,2)
     let playerDirection = "right"; // Starting direction is right
     let lastDirection = "right"; // Saves the last direction of the player
@@ -90,7 +90,7 @@ function GameBoard({scoreDisplay}) {
 
     const move = () => {
         const playerHead = playerPositions[0];
-        const tail = playerPositions[playerPositions.length-1];
+        const tail = playerPositions[playerPositions.length - 1];
         lastPosition = new Position(tail.row, tail.col); // Save the tail position
 
         //moving the body
@@ -101,7 +101,7 @@ function GameBoard({scoreDisplay}) {
 
         switch (playerDirection) { //moving the head
             case "right":
-                if (playerHead.col < 15) { 
+                if (playerHead.col < 15) {
                     playerHead.col++;
                     lastDirection = "right";
                 } else {
@@ -117,7 +117,7 @@ function GameBoard({scoreDisplay}) {
                 }
                 break;
             case "left":
-                if (playerHead.col > 0) {
+                if (playerHead.col > 1) {
                     playerHead.col--;
                     lastDirection = "left";
                 } else {
@@ -125,7 +125,7 @@ function GameBoard({scoreDisplay}) {
                 }
                 break;
             case "up":
-                if (playerHead.row > 0) {
+                if (playerHead.row > 1) {
                     playerHead.row--;
                     lastDirection = "up";
                 } else {
@@ -136,7 +136,7 @@ function GameBoard({scoreDisplay}) {
                 break;
         }
 
-        checkEat();// after each move checking if the you are on food and action based on it
+        checkEat(); // after each move checking if you are on food and action based on it
         checkOverlap();
     };
 
@@ -153,10 +153,17 @@ function GameBoard({scoreDisplay}) {
     };
 
     //checking overlap and ending game if true
-    const checkOverlap = () =>{
-        if(playerPositions.slice(1).some(pos => pos.equals(playerPositions[0]))){
+    const checkOverlap = () => {
+        if (playerPositions.slice(1).some(pos => pos.equals(playerPositions[0]))) {
             gameOver();
         }
+    }
+
+    const updateGameState = () => {
+        if (gameRunning)
+            setGameState("running");
+        else
+            setGameState("gameOver");
     }
 
     //checks if the player ate and increase player size
@@ -164,25 +171,21 @@ function GameBoard({scoreDisplay}) {
         if (foodPosition && playerPositions[0].equals(foodPosition)) {
             foodPosition = null;
             playerPositions.push(lastPosition);
-            score+=200;
+            score += 200;
             scoreDisplay(score);
             generateFood();
         }
     };
 
-
     //print the positions for debugging
-    const printPositions = () =>{
+    const printPositions = () => {
         let positons = [];
-        playerPositions.forEach(pos =>{
+        playerPositions.forEach(pos => {
             positons.push(pos);
         })
         console.log(`food: ${foodPosition}`);
         console.log(`player: ${positons}`);
-        
     }
-
-    
 
     let intervals = [];
     const reStartGame = () => {
@@ -197,16 +200,12 @@ function GameBoard({scoreDisplay}) {
         score = 0;
         scoreDisplay(score);
         gameRunning = true;
+        intervals.push(setInterval(updateGameState, gameTick));
     };
 
-    useEffect(() => {
-        reStartGame();
-        return () => {
-            intervals.forEach(interval => {
-                clearInterval(interval);
-            });
-        };
-    }, []);
+    useImperativeHandle(ref, () => ({
+        reStartGame
+    }));
 
     const gameOver = () => {
         intervals.forEach(interval => {
@@ -214,6 +213,7 @@ function GameBoard({scoreDisplay}) {
         });
         console.log("gameover");
         gameRunning = false;
+        updateGameState();
     };
 
     return (
@@ -221,7 +221,7 @@ function GameBoard({scoreDisplay}) {
             {mappedBlocks}
         </div>
     );
-}
+});
 
 class Position {
     constructor(row, col) {
@@ -239,12 +239,12 @@ class Position {
         const randomCol = Math.floor(Math.random() * (maxCol - 1)) + 1;
         return new Position(randomRow, randomCol);
     }
-    
+
     equals(other) {
         return this.row === other.row && this.col === other.col;
     }
 
-    toString(){
+    toString() {
         return `${this.row}-${this.col}`;
     }
 }
