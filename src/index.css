@@ -1,9 +1,80 @@
+body{
+  font-family:'Times New Roman', Times, serif;
+}
+
+.App{
+  display: flex;
+  padding: 20px;
+  flex-direction:column;
+}
+
+.game-message-container{
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 50%;
+  top:30%;
+  transform: translate(-50%,-50%);
+  align-items: center;
+}
+
+.start-btn{
+  font-family: 'Times New Roman', Times, serif ;
+  width: 70%;
+  font-size: 2rem;
+  border-radius: 0;
+  font-weight: bold;
+  color: white;
+  background-color: rgb(75, 81, 81);
+}
+
+.game-over-text{
+  font-size: 4rem;
+  color: rgb(155, 10, 10);
+}
+#game-over{
+  animation-name: game-over;
+  animation-duration: 2.5s;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+}
+@keyframes game-over{
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100%{
+    opacity: 1;
+  }
+}
+
+.score-display-container{
+  position: absolute;
+  align-self: flex-end;
+  text-align: center;
+  width: 25%;
+}
+
+.dash-board-container{
+  position: absolute;
+  align-self: flex-start;
+  width: 25%;
+  text-align: center;
+}
 
 #board-container {
+  position: absolute;
+  left: 50%;
+  top:50%;
+  transform: translate(-50%,-50%);
   display: grid;
   grid-template-columns: repeat(15, 1fr);
   width: fit-content;
   border: gray 2px solid;
+  
 }
 
 

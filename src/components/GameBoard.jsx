@@ -2,8 +2,8 @@ import React, { useState, useEffect, useImperativeHandle } from 'react';
 
 const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
     let playerPositions = [new Position(2, 2)]; // Starting with one block at position (2,2)
-    let playerDirection = ""; // Starting direction is right
-    let lastDirection = ""; // Saves the last direction of the player
+    let playerDirection; // Starting direction is right
+    let lastDirection; // Saves the last direction of the player
     let gameRunning = false;
     let score;
     let foodPosition = null;
@@ -198,9 +198,12 @@ const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
         console.log(`player: ${positons}`);
     };
 
+
+    //starts game
     let intervals = [];
     const reStartGame = () => {
-        const gameTick = 500; // Game ticks every x milliseconds
+        clearBlocks();
+        const gameTick = 200; // Game ticks every x milliseconds
         playerPositions = [new Position(2, 2)];
         generateFood(); // Generate initial food position
         intervals.push(setInterval(move, gameTick));
@@ -214,6 +217,26 @@ const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
         intervals.push(setInterval(updateGameState, gameTick));
     };
 
+    //does a wave effect on board
+    const startWaveEffect = () => {
+        clearBlocks(); // Clear any existing colors on the board
+        let waveRow = 1; // Start the wave from the first row
+        const waveInterval = setInterval(() => {
+            if (waveRow <= boardHeight) {
+                for (let col = 1; col <= boardWidth; col++) {
+                    const block = document.getElementById(`row${waveRow}col${col}`);
+                    if (block) {
+                        block.style.backgroundColor = "darkgray";
+                    }
+                }
+                waveRow++;
+            } else {
+                clearInterval(waveInterval); // Stop the wave once it reaches the last row
+            }
+        }, 100);
+    };
+
+    //ends game by ending all intervals
     const gameOver = () => {
         intervals.forEach(interval => {
             clearInterval(interval);
@@ -221,6 +244,7 @@ const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
         console.log("gameover");
         gameRunning = false;
         updateGameState();
+        startWaveEffect();
     };
 
     return (

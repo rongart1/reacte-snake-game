@@ -6,9 +6,7 @@ function DashBoard({score,gameState,setGameState}){
        setGameState("running");
     }
 
-    return(<div className="dash-board">
-
-        <h1>Score : {score}</h1>
+    return(<div className="dash-board-container">
         <h1>game status: {gameState}</h1>
         <button onClick={startGame}>Start Game</button>
     </div>);
