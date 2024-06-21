@@ -12,15 +12,19 @@ const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
         console.log(`change dir called with: ${keyCode}`);
         switch (keyCode) {
             case "KeyD":
+            case "ArrowRight":
                 if (lastDirection != "left") playerDirection = "right";
                 break;
             case "KeyA":
+            case "ArrowLeft":
                 if (lastDirection != "right") playerDirection = "left";
                 break;
             case "KeyW":
+            case "ArrowUp":
                 if (lastDirection != "down") playerDirection = "up";
                 break;
             case "KeyS":
+            case "ArrowDown":
                 if (lastDirection != "up") playerDirection = "down";
                 break;
             default:
@@ -29,6 +33,7 @@ const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
         }
         console.log(playerDirection);
     };
+    
 
     // Adding event listener for change direction
     const handleKeyDown = (key) => {
