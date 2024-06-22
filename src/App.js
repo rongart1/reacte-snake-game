@@ -6,16 +6,19 @@ import GameMessage from './components/GameMessage';
 function App() {
     const [score, setScore] = useState(0);
     const [gameState, setGameState] = useState("idle");
+    const [teleporters, setTeleporters] = useState(false); // for turning teleporters off and on
 
     return (
         <div className="App">
             <DashBoard  
               gameState={gameState} 
-              setGameState={setGameState}/>
+              setGameState={setGameState}
+              setTeleporters={setTeleporters}/>
             <GameBoard 
               scoreDisplay={setScore} 
               gameState={gameState} 
-              setGameState={setGameState} 
+              setGameState={setGameState}
+              teleporters ={teleporters} 
             />
             <ScoreDisplay score={score}/>
             <GameMessage

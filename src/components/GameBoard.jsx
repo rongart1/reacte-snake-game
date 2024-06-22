@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useImperativeHandle } from 'react';
-
-const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
+import portalImg from '../assests/portal.gif';
+const GameBoard = ({ scoreDisplay, gameState, setGameState, teleporters }) => {
     let playerPositions = [new Position(2, 2)]; // Starting with one block at position (2,2)
     let playerDirection; // Starting direction is right
     let lastDirection; // Saves the last direction of the player
     let gameRunning = false;
     let score;
     let foodPosition = null;
+    let teleporterPositions = [];
 
     const changeDirection = (keyCode) => {
         console.log(`change dir called with: ${keyCode}`);
@@ -147,6 +148,9 @@ const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
 
         checkEat(); // After each move checking if you are on food and action based on it
         checkOverlap();
+        if(teleporters){
+            checkTeleport();
+        }
     };
 
     const clearBlocks = () => {
@@ -158,7 +162,11 @@ const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
                 (!foodPosition || !foodPosition.equals(blockPosition))) {
                 block.style.backgroundColor = "white";
             }
+            if(!teleporterPositions.some(pos => pos.equals(blockPosition))){
+                block.innerHTML="";
+            }
         });
+
     };
 
     // Checking overlap and ending game if true
@@ -203,10 +211,62 @@ const GameBoard = ({ scoreDisplay, gameState, setGameState }) => {
         console.log(`player: ${positons}`);
     };
 
+    const gemerateTeleporter = () =>{
+        let randomPos1;
+        let randomPos2;
+        do {
+            randomPos1 = Position.generateRandomPos(boardHeight, boardWidth);
+        } while (playerPositions.some(pos => pos.equals(randomPos1)));
+        do {
+            randomPos2 = Position.generateRandomPos(boardHeight, boardWidth);
+        } while (playerPositions.some(pos => pos.equals(randomPos2)));
+
+        teleporterPositions = [randomPos1,randomPos2];
+        colorTeleporters();
+    }
+
+    const colorTeleporters = ()=>{
+        if (teleporterPositions) {
+            try {
+                // Fetch the teleporter blocks
+                const teleporterBlock1 = document.getElementById(`row${teleporterPositions[0].row}col${teleporterPositions[0].col}`);
+                const teleporterBlock2 = document.getElementById(`row${teleporterPositions[1].row}col${teleporterPositions[1].col}`);
+                
+                teleporterBlock1.innerHTML=`<img class="portal-img" src=${portalImg} alt="portal" />` ;
+                teleporterBlock2.innerHTML=`<img class="portal-img" src=${portalImg} alt="portal" />` ;
+                
+                
+            } catch (error) {
+                console.error("An error occurred while setting the teleporter blocks: ", error);
+            }
+            
+        }
+    }
+
+    const checkTeleport = () =>{
+        if(teleporterPositions.length =2){
+            if(playerPositions[0].equals(teleporterPositions[0])){
+                playerPositions[0].row = teleporterPositions[1].row;
+                playerPositions[0].col = teleporterPositions[1].col;
+                teleporterPositions=[];
+            }
+            else if(playerPositions[0].equals(teleporterPositions[1])){
+                playerPositions[0].row = teleporterPositions[0].row;
+                playerPositions[0].col = teleporterPositions[0].col;
+                teleporterPositions=[];
+            }
+        }
+        if(teleporterPositions.length==0){
+            gemerateTeleporter();
+        }
+    }
 
     //starts game
     let intervals = [];
     const reStartGame = () => {
+        if(teleporters){
+            gemerateTeleporter();
+        }
         clearBlocks();
         const gameTick = 200; // Game ticks every x milliseconds
         playerPositions = [new Position(2, 2)];
@@ -284,7 +344,10 @@ class Position {
     }
 
     equals(other) {
-        return this.row === other.row && this.col === other.col;
+        if(other){
+            return this.row === other.row && this.col === other.col;
+        }
+        return false;
     }
 
     toString() {
